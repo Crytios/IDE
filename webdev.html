@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <style>
+        
+html,body { margin:0; padding:0; height:100%; width:100%; overflow: hidden;}
+
+#editor {
+    height: 100%;
+    width:50%;
+    display:inline-block;
+    font-size: 20px;
+}
+
+#container {
+	height:100%;
+	width:auto;
+  white-space : nowrap; 
+  overflow : hidden;
+  position:relative;
+}
+#Code{
+  font-size:20px ;
+  background-color:beige;
+  border-radius: 5px;
+  border:none;
+}
+
+#iframe {
+	height:100%;
+	display:inline-block;
+	width:50%;
+}
+
+/* disable tag matching */
+.ace_editor .ace_marker-layer .ace_bracket { display: none }
+
+
+
+.navbar {
+  font-size: 18px;
+ background-color: #1b2845;
+background-image: linear-gradient(315deg, #1b2845 0%, #274060 74%);
+  font-family:BN Machine;
+  font-size:20px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 10px;
+ 
+}
+
+.main-nav {
+  list-style-type: none;
+  display: none;
+}
+
+.nav-links,
+.logo {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.main-nav li {
+  text-align: center;
+  margin: 15px auto;
+}
+
+.logo {
+  display: inline-block;
+  font-size: 22px;
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+.navbar-toggle {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 24px;
+}
+
+.active {
+  display: block;
+}
+
+@media screen and (min-width: 768px) {
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0;
+    height: 70px;
+    align-items: center;
+  }
+
+  .main-nav {
+    display: flex;
+    margin-right: 30px;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .main-nav li {
+    margin: 0;
+  }
+
+  .nav-links {
+    margin-left: 40px;
+  }
+
+  .logo {
+    margin-top: 0;
+  }
+
+  .navbar-toggle {
+    display: none;
+  }
+
+  .logo:hover,
+  .nav-links:hover {
+    color: rgba(255, 255, 255, 1);
+  }
+}
+
+.nav-links {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.nav-links .popup {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+}
+
+/* Popup arrow */
+.nav-links .popup::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.nav-links .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+ 
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <!-- .navbar -->
+    <nav class="navbar">
+        <span class="navbar-toggle" id="js-navbar-toggle">
+                <i class="fas fa-bars"></i>
+            </span>
+        <a href="#" class="logo"><input type="name" id="Code" placeholder=" Enter File Name" ></a>
+        <ul class="main-nav" id="js-menu">
+          <li>
+            <a href="index.html" class="nav-links">Home</a>
+          </li>
+          <li>
+            <a href="#" class="nav-links" onclick="saveFile()">Save</a>
+          </li>
+          <li>
+            <a href="#" class="nav-links" id="pop" onclick="pop()">
+              Info
+              <span class="popup" id="popid"> 
+             BY RUNT1M3 T3RR0R
+                 </span>
+              </a>
+          </li>
+          <li>
+            <a href="mailto:supdudes1606@gmail.com" class="nav-links">Contact</a>
+          </li>
+          
+        </ul>
+      </nav>
+    <!--navabr end-->
+    <div id='container'>
+
+        <div id="editor">
+        </div>
+      
+        <iframe id='iframe' frameBorder="0">
+        </iframe>
+      </div>
+
+      <script>
+          function update()
+{
+	var idoc = document.getElementById('iframe').contentWindow.document;
+
+	idoc.open();
+	idoc.write(editor.getValue());
+	idoc.close();
+}
+
+function setupEditor()
+{
+  window.editor = ace.edit("editor");
+  editor.setTheme("ace/theme/cobalt");
+  editor.getSession().setMode("ace/mode/html");
+  editor.setValue(`<!DOCTYPE html>
+<html>
+<head>
+</head>
+
+<body>
+</body>
+
+</html>`,1); //1 = moves cursor to end
+
+  editor.getSession().on('change', function() {
+    update();
+  });
+
+  editorr.focus();
+  
+  
+  editorr.setOptions({
+    fontSize: "16pt",
+    showLineNumbers: false,
+    showGutter: false,
+    vScrollBarAlwaysVisible:true,
+    enableBasicAutocompletion: false, enableLiveAutocompletion: false
+  });
+
+  editorr.setShowPrintMargin(false);
+  editorr.setBehavioursEnabled(false);
+}
+
+setupEditor();
+update();
+  
+      </script>
+
+      <script>
+          let mainNav = document.getElementById("js-menu");
+let navBarToggle = document.getElementById("js-navbar-toggle");
+
+navBarToggle.addEventListener("click", function() {
+  mainNav.classList.toggle("active");
+});
+
+      </script>
+      <script>
+          function saveFile() {
+
+var node = document.getElementById("editor")
+
+const text = node.innerText;
+
+const blob = new Blob([text], {type: "text/plain;charset:utf-8"});
+const Fname = document.getElementById("Code").value;
+ saveAs(blob, Fname)
+
+}
+
+function pop() {
+  var popup = document.getElementById("popid");
+  popup.classList.toggle("show");
+}
+      </script>
+</body>
+</html>
